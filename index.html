@@ -816,12 +816,26 @@
     }
   } catch (e) {}
 
-  fetch(`${FANFORGE_API}/api/game-config/memory-challenge${queryPath}`)
-    .then((r) => r.json())
-    .then((config) => {
-      if (config) applyConfig(config);
-    })
-    .catch(() => {
+  const primaryApi = FANFORGE_API;
+  const fallbackApi = 'http://localhost:8000';
+
+  function fetchConfigFrom(apiUrl) {
+    return fetch(`${apiUrl}/api/game-config/memory-challenge${queryPath}`)
+      .then((r) => {
+        if (!r.ok) throw new Error('Config not found');
+        return r.json();
+      })
+      .then((config) => {
+        if (config) {
+          applyConfig(config);
+          return true;
+        }
+        return false;
+      });
+  }
+
+  fetchConfigFrom(primaryApi).catch(() => {
+    fetchConfigFrom(fallbackApi).catch(() => {
       if (TILE_POOL.length === 0) {
         TILE_POOL = DEFAULT_ICONS.map((em, i) => ({
           id: `default-${i}`, content: em, type: 'emoji', imageUrl: '', backColor: i % 2 === 0 ? '#232a52' : '#3a2350'
@@ -829,13 +843,15 @@
         buildBoard();
       }
     });
+  });
 
   // ─────────────────────────────────────────────────────────────
   // 2. WEBSOCKET — Live config hot-reload without page refresh
   // ─────────────────────────────────────────────────────────────
-  function connectWS() {
+  function connectWS(apiUrl = primaryApi) {
     try {
-      const ws = new WebSocket(`${FANFORGE_API.replace(/^http/, 'ws')}/ws`);
+      const wsUrl = `${apiUrl.replace(/^http/, 'ws')}/ws`;
+      const ws = new WebSocket(wsUrl);
 
       ws.onmessage = (event) => {
         try {
@@ -848,13 +864,22 @@
         } catch (e) {}
       };
 
-      ws.onclose = () => {
-        // Auto-reconnect after 3s
-        setTimeout(connectWS, 3000);
+      ws.onerror = () => {
+        if (apiUrl !== fallbackApi) {
+          connectWS(fallbackApi);
+        }
       };
-    } catch (e) {}
+
+      ws.onclose = () => {
+        setTimeout(() => connectWS(apiUrl), 3000);
+      };
+    } catch (e) {
+      if (apiUrl !== fallbackApi) {
+        connectWS(fallbackApi);
+      }
+    }
   }
-  connectWS();
+  connectWS(primaryApi);
 
 })();
 </script>
