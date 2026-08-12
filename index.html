@@ -789,6 +789,22 @@
   const urlParams = new URLSearchParams(window.location.search);
   const qInstanceId = urlParams.get('instanceId') || urlParams.get('id');
   const qBrandId = urlParams.get('brandId') || urlParams.get('userId') || urlParams.get('brand');
+  const rawC = urlParams.get('c') || urlParams.get('config');
+
+  if (rawC) {
+    try {
+      const decodedStr = atob(decodeURIComponent(rawC));
+      const decodedConfig = JSON.parse(decodedStr);
+      if (decodedConfig && (decodedConfig.tiles || decodedConfig.gameTitle || decodedConfig.headline)) {
+        applyConfig(decodedConfig);
+      }
+    } catch (e) {
+      try {
+        const decodedConfig = JSON.parse(decodeURIComponent(rawC));
+        if (decodedConfig) applyConfig(decodedConfig);
+      } catch (err) {}
+    }
+  }
 
   const queryParts = [];
   if (qInstanceId) queryParts.push(`instanceId=${encodeURIComponent(qInstanceId)}`);

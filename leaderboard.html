@@ -445,8 +445,9 @@
   <div class="page-header">
     <a class="back-btn" href="index.html" title="Back to game">←</a>
     <div class="header-center">
+      <img id="brand-logo" src="" alt="Brand Logo" style="height:28px;object-fit:contain;display:none;margin-bottom:2px;" />
       <span class="crown">👑</span>
-      <h1>Memory Challenge Leaderboard</h1>
+      <h1 id="lb-title">Memory Challenge Leaderboard</h1>
     </div>
   </div>
 
@@ -481,6 +482,78 @@
   </div><!-- /columns -->
 
 </div><!-- /page -->
+
+<script>
+(function () {
+  // ─────────────────────────────────────────────────────────────
+  // Fetch the same brand config the game uses, and apply it here
+  // ─────────────────────────────────────────────────────────────
+  const FANFORGE_API =
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''))
+      ? 'http://localhost:8000'
+      : 'https://engagements-six.vercel.app';
+
+  const titleEl = document.getElementById('lb-title');
+  const logoEl  = document.getElementById('brand-logo');
+
+  const gradientMap = {
+    'from-slate-950 via-indigo-950 to-slate-950': 'radial-gradient(ellipse at 50% -10%, #2a1e5c 0%, #12131f 60%)',
+    'from-purple-950 via-slate-950 to-indigo-950': 'radial-gradient(ellipse at 50% -10%, #3b0764 0%, #0f172a 60%)',
+    'from-emerald-950 via-slate-950 to-teal-950': 'radial-gradient(ellipse at 50% -10%, #064e3b 0%, #0f172a 60%)',
+    'from-red-950 via-slate-950 to-amber-950': 'radial-gradient(ellipse at 50% -10%, #450a0a 0%, #0f172a 60%)',
+    'from-slate-900 via-slate-950 to-slate-900': 'radial-gradient(ellipse at 50% -10%, #1e293b 0%, #020617 60%)',
+  };
+
+  function applyConfig(rawConfig) {
+    if (!rawConfig) return;
+    const config = rawConfig.config || rawConfig;
+
+    if (config.brandColor) {
+      document.documentElement.style.setProperty('--gold', config.brandColor);
+      document.documentElement.style.setProperty('--score-color', config.brandColor);
+    }
+    if (config.accentColor) {
+      document.documentElement.style.setProperty('--accent', config.accentColor);
+    }
+
+    if (config.backgroundImage) {
+      document.body.style.background = `url("${config.backgroundImage}") center/cover no-repeat`;
+    } else if (config.bgGradient) {
+      document.body.style.background = gradientMap[config.bgGradient] || config.bgGradient;
+    } else if (config.backgroundColor) {
+      document.body.style.background = config.backgroundColor;
+      document.documentElement.style.setProperty('--bg-0', config.backgroundColor);
+    }
+
+    if (titleEl) {
+      const gameTitle = config.gameTitle || config.title || 'Memory Challenge';
+      titleEl.textContent = `${gameTitle} Leaderboard`;
+    }
+
+    if (logoEl) {
+      if (config.brandLogo) {
+        logoEl.src = config.brandLogo;
+        logoEl.style.display = 'block';
+      } else {
+        logoEl.style.display = 'none';
+      }
+    }
+  }
+
+  const primaryApi = FANFORGE_API;
+  const fallbackApi = 'http://localhost:8000';
+
+  function fetchConfigFrom(apiUrl) {
+    return fetch(`${apiUrl}/api/game-config/memory-challenge?_t=${Date.now()}`, { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('Config not found'))))
+      .then((config) => { if (config) applyConfig(config); });
+  }
+
+  fetchConfigFrom(primaryApi).catch(() => {
+    fetchConfigFrom(fallbackApi).catch(() => {});
+  });
+})();
+</script>
 
 <script type="module">
 /* ════════════════════════════════════════════════
