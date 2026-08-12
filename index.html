@@ -816,6 +816,14 @@
     }
   } catch (e) {}
 
+  // Load config.json file directly from repository
+  fetch('./config.json')
+    .then((r) => (r.ok ? r.json() : null))
+    .then((fileCfg) => {
+      if (fileCfg) applyConfig(fileCfg);
+    })
+    .catch(() => {});
+
   const primaryApi = FANFORGE_API;
   const fallbackApi = 'http://localhost:8000';
 
