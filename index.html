@@ -793,36 +793,13 @@
   if (qBrandId) queryParts.push(`brandId=${encodeURIComponent(qBrandId)}`);
   const queryPath = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
 
-  try {
-    let cached = null;
-    if (qInstanceId) {
-      cached = localStorage.getItem(`fanforge_game_config_${qInstanceId}`);
-    } else if (qBrandId) {
-      cached = localStorage.getItem(`fanforge_game_config_${qBrandId}`);
-    } else {
-      cached = localStorage.getItem('fanforge_game_config_memory-challenge');
-      if (!cached) {
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith('fanforge_mc_draft_')) {
-            cached = localStorage.getItem(k);
-            break;
-          }
-        }
-      }
-    }
-    if (cached) {
-      applyConfig(JSON.parse(cached));
-    }
-  } catch (e) {}
-
-
-
   const primaryApi = FANFORGE_API;
   const fallbackApi = 'http://localhost:8000';
 
   function fetchConfigFrom(apiUrl) {
-    return fetch(`${apiUrl}/api/game-config/memory-challenge${queryPath}`)
+    const ts = `_t=${Date.now()}`;
+    const fullPath = queryPath ? `${queryPath}&${ts}` : `?${ts}`;
+    return fetch(`${apiUrl}/api/game-config/memory-challenge${fullPath}`, { cache: 'no-store' })
       .then((r) => {
         if (!r.ok) throw new Error('Config not found');
         return r.json();
