@@ -540,12 +540,14 @@
   }
 
   let activeConfig = null;
+  window.applyConfig = applyConfig;
 
   /* ── Apply brand config ── */
   function applyConfig(rawConfig) {
     if (!rawConfig) return;
     const config = rawConfig.config || rawConfig;
     activeConfig = config;
+    window.applyConfig = applyConfig;
 
     // Apply colors & background
     if (config.backgroundImage) {
