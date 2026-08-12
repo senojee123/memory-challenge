@@ -25,6 +25,7 @@
     --tile-a:       rgba(255,255,255,0.04);
     --tile-b:       rgba(255,255,255,0.04);
     --tile-border:  rgba(255,255,255,0.08);
+    --panel-border: rgba(217,171,82,0.4);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -172,8 +173,8 @@
      LEFT COLUMN — LEADERBOARD
   ────────────────────────────────── */
   .lb-panel {
-    background: linear-gradient(160deg, rgba(30,32,72,0.92), rgba(46,26,68,0.92));
-    border: 1px solid rgba(217,171,82,0.4);
+    background: linear-gradient(160deg, var(--panel-a), var(--panel-b));
+    border: 1px solid var(--panel-border);
     border-radius: 20px;
     padding: clamp(14px, 2.5vw, 22px);
     backdrop-filter: blur(10px);
@@ -335,8 +336,8 @@
      RIGHT COLUMN — QR / SCAN TO PLAY
   ────────────────────────────────── */
   .qr-panel {
-    background: linear-gradient(160deg, rgba(30,32,72,0.92), rgba(46,26,68,0.92));
-    border: 1px solid rgba(217,171,82,0.4);
+    background: linear-gradient(160deg, var(--panel-a), var(--panel-b));
+    border: 1px solid var(--panel-border);
     border-radius: 20px;
     padding: clamp(18px, 3vw, 32px) clamp(14px, 2.5vw, 28px);
     backdrop-filter: blur(10px);
@@ -531,6 +532,17 @@
     const secondTile = (config.useDualColors && config.cardBackColor2) ? config.cardBackColor2 : config.cardBackColor;
     if (secondTile) {
       document.documentElement.style.setProperty('--tile-b', secondTile + '33');
+    }
+
+    // "Top Players" and "Scan to Play" panels — same brand colors, much more opaque (solid glass look)
+    if (config.cardBackColor) {
+      document.documentElement.style.setProperty('--panel-a', config.cardBackColor + 'ea');
+    }
+    if (secondTile) {
+      document.documentElement.style.setProperty('--panel-b', secondTile + 'ea');
+    }
+    if (config.brandColor) {
+      document.documentElement.style.setProperty('--panel-border', config.brandColor + '66');
     }
 
     // Leaderboard text (player names, QR hint emphasis) — opt-in override
