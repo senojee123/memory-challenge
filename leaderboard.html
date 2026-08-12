@@ -550,6 +550,15 @@
     if (titleEl) {
       const gameTitle = config.gameTitle || config.title || 'Memory Challenge';
       titleEl.textContent = `${gameTitle} Leaderboard`;
+
+      // Title normally uses a fixed gradient (via background-clip:text);
+      // an explicit titleColor overrides it with a solid brand color.
+      const solidTitleColor = config.titleColor || config.brandColor;
+      if (solidTitleColor) {
+        titleEl.style.background = 'none';
+        titleEl.style.webkitTextFillColor = solidTitleColor;
+        titleEl.style.color = solidTitleColor;
+      }
     }
 
     if (logoEl) {
