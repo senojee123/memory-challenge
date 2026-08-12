@@ -22,6 +22,9 @@
     --paper:      #f5efe0;
     --muted:      #a6a9c8;
     --score-color:#ffd166;
+    --tile-a:       rgba(255,255,255,0.04);
+    --tile-b:       rgba(255,255,255,0.04);
+    --tile-border:  rgba(255,255,255,0.08);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -237,13 +240,17 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--tile-a);
+    border: 1px solid var(--tile-border);
     border-radius: 12px;
     padding: clamp(8px, 1.5vw, 12px) clamp(10px, 1.8vw, 14px);
     transition: transform 0.15s;
   }
   .lb-row:hover { transform: translateX(3px); }
+
+  /* Ranks below the podium alternate between the two brand tile colors */
+  .lb-row:nth-child(odd)  { background: var(--tile-a); }
+  .lb-row:nth-child(even) { background: var(--tile-b); }
 
   .lb-row.top1 {
     background: linear-gradient(135deg, rgba(217,171,82,0.22), rgba(255,209,102,0.06));
@@ -514,6 +521,21 @@
     }
     if (config.accentColor) {
       document.documentElement.style.setProperty('--accent', config.accentColor);
+    }
+
+    // Leaderboard row tiles reuse the same tile back colors set for the game cards
+    if (config.cardBackColor) {
+      document.documentElement.style.setProperty('--tile-a', config.cardBackColor + '33');
+      document.documentElement.style.setProperty('--tile-border', config.cardBackColor + '66');
+    }
+    const secondTile = (config.useDualColors && config.cardBackColor2) ? config.cardBackColor2 : config.cardBackColor;
+    if (secondTile) {
+      document.documentElement.style.setProperty('--tile-b', secondTile + '33');
+    }
+
+    // Leaderboard text (player names, QR hint emphasis) — opt-in override
+    if (config.leaderboardTextColor) {
+      document.documentElement.style.setProperty('--paper', config.leaderboardTextColor);
     }
 
     if (config.backgroundImage) {
