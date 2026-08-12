@@ -862,10 +862,10 @@
 
 })();
 </script>
-<!-- Firebase: push score to shared Realtime Database -->
+<!-- Firebase: push score & sync dynamic game config to shared Realtime Database -->
 <script type="module">
-  import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { getDatabase, ref, push } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+  import { initializeApp }               from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getDatabase, ref, push, set, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
   const firebaseConfig = {
     apiKey:            "AIzaSyDTHb7X6tE3yLFIr7BiKKNfiM8KQNGKHHg",
@@ -890,6 +890,19 @@
       timestamp: Date.now()
     }).catch(err => console.warn('Firebase write failed:', err));
   };
+
+  /* Exposed globally for saving dynamic game config */
+  window.firebaseSaveConfig = function (cfg) {
+    set(ref(db, 'gameConfig'), cfg).catch(err => console.warn('Firebase config write failed:', err));
+  };
+
+  /* Listen for real-time cloud config updates */
+  onValue(ref(db, 'gameConfig'), (snapshot) => {
+    const cfg = snapshot.val();
+    if (cfg && window.applyConfig) {
+      window.applyConfig(cfg);
+    }
+  });
 </script>
 </body>
 </html>
