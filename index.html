@@ -955,10 +955,10 @@
     const qBrandId = urlParams.get('brandId') || urlParams.get('userId') || urlParams.get('brand');
 
     // If we are looking for a specific instance/brand, ignore updates from other games
-    if (qInstanceId && cfg.instanceId && cfg.instanceId !== qInstanceId) {
+    if (qInstanceId && cfg.instanceId !== qInstanceId) {
       return;
     }
-    if (qBrandId && cfg.brandId && cfg.brandId !== qBrandId) {
+    if (qBrandId && cfg.brandId !== qBrandId) {
       return;
     }
 
