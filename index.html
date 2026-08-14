@@ -814,6 +814,26 @@
   const primaryApi = FANFORGE_API;
   const fallbackApi = 'http://localhost:8000';
 
+  // Build cache key matching the main app
+  const cacheKey = qInstanceId
+    ? `fanforge_game_config_${qInstanceId}`
+    : qBrandId
+    ? `fanforge_game_config_${qBrandId}_memory-challenge`
+    : `fanforge_game_config_memory-challenge`;
+
+  // Attempt to load from cache immediately to eliminate loading latency
+  let hasLoadedFromCache = false;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const parsedConfig = JSON.parse(cached);
+      if (parsedConfig) {
+        applyConfig(parsedConfig);
+        hasLoadedFromCache = true;
+      }
+    }
+  } catch (e) {}
+
   function fetchConfigFrom(apiUrl) {
     const ts = `_t=${Date.now()}`;
     const fullPath = queryPath ? `${queryPath}&${ts}` : `?${ts}`;
@@ -825,6 +845,9 @@
       .then((config) => {
         if (config) {
           applyConfig(config);
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(config));
+          } catch (e) {}
           return true;
         }
         return false;
@@ -833,7 +856,7 @@
 
   fetchConfigFrom(primaryApi).catch(() => {
     fetchConfigFrom(fallbackApi).catch(() => {
-      if (TILE_POOL.length === 0) {
+      if (!hasLoadedFromCache && TILE_POOL.length === 0) {
         TILE_POOL = DEFAULT_ICONS.map((em, i) => ({
           id: `default-${i}`, content: em, type: 'emoji', imageUrl: '', backColor: i % 2 === 0 ? '#232a52' : '#3a2350'
         }));
@@ -878,6 +901,13 @@
   }
   connectWS(primaryApi);
 
+  // Preserve query parameters when navigating to leaderboard
+  if (window.location.search) {
+    document.querySelectorAll('a[href="leaderboard.html"]').forEach((link) => {
+      link.href = 'leaderboard.html' + window.location.search;
+    });
+  }
+
 })();
 </script>
 <!-- Firebase: push score & sync dynamic game config to shared Realtime Database -->
@@ -919,6 +949,17 @@
     const cfg = snapshot.val();
     if (cfg && window.applyConfig) {
       window.applyConfig(cfg);
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const qInstanceId = urlParams.get('instanceId') || urlParams.get('id');
+        const qBrandId = urlParams.get('brandId') || urlParams.get('userId') || urlParams.get('brand');
+        const cacheKey = qInstanceId
+          ? `fanforge_game_config_${qInstanceId}`
+          : qBrandId
+          ? `fanforge_game_config_${qBrandId}_memory-challenge`
+          : `fanforge_game_config_memory-challenge`;
+        localStorage.setItem(cacheKey, JSON.stringify(cfg));
+      } catch (e) {}
     }
   });
 </script>

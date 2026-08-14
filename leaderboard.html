@@ -583,18 +583,62 @@
     }
   }
 
+  // Read query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const qInstanceId = urlParams.get('instanceId') || urlParams.get('id');
+  const qBrandId = urlParams.get('brandId') || urlParams.get('userId') || urlParams.get('brand');
+
+  const queryParts = [];
+  if (qInstanceId) queryParts.push(`instanceId=${encodeURIComponent(qInstanceId)}`);
+  if (qBrandId) queryParts.push(`brandId=${encodeURIComponent(qBrandId)}`);
+  const queryPath = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
+
+  const cacheKey = qInstanceId
+    ? `fanforge_game_config_${qInstanceId}`
+    : qBrandId
+    ? `fanforge_game_config_${qBrandId}_memory-challenge`
+    : `fanforge_game_config_memory-challenge`;
+
+  // Attempt to load from cache immediately to eliminate loading latency
+  let hasLoadedFromCache = false;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const parsedConfig = JSON.parse(cached);
+      if (parsedConfig) {
+        applyConfig(parsedConfig);
+        hasLoadedFromCache = true;
+      }
+    }
+  } catch (e) {}
+
   const primaryApi = FANFORGE_API;
   const fallbackApi = 'http://localhost:8000';
 
   function fetchConfigFrom(apiUrl) {
-    return fetch(`${apiUrl}/api/game-config/memory-challenge?_t=${Date.now()}`, { cache: 'no-store' })
+    const ts = `_t=${Date.now()}`;
+    const fullPath = queryPath ? `${queryPath}&${ts}` : `?${ts}`;
+    return fetch(`${apiUrl}/api/game-config/memory-challenge${fullPath}`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('Config not found'))))
-      .then((config) => { if (config) applyConfig(config); });
+      .then((config) => {
+        if (config) {
+          applyConfig(config);
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(config));
+          } catch (e) {}
+        }
+      });
   }
 
   fetchConfigFrom(primaryApi).catch(() => {
     fetchConfigFrom(fallbackApi).catch(() => {});
   });
+
+  // Preserve query parameters back to game
+  const backBtn = document.querySelector('.back-btn');
+  if (backBtn && window.location.search) {
+    backBtn.href = 'index.html' + window.location.search;
+  }
 })();
 </script>
 
