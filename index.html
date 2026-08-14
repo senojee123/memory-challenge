@@ -947,12 +947,24 @@
   /* Listen for real-time cloud config updates */
   onValue(ref(db, 'gameConfig'), (snapshot) => {
     const cfg = snapshot.val();
-    if (cfg && window.applyConfig) {
+    if (!cfg) return;
+
+    // Read active query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const qInstanceId = urlParams.get('instanceId') || urlParams.get('id');
+    const qBrandId = urlParams.get('brandId') || urlParams.get('userId') || urlParams.get('brand');
+
+    // If we are looking for a specific instance/brand, ignore updates from other games
+    if (qInstanceId && cfg.instanceId && cfg.instanceId !== qInstanceId) {
+      return;
+    }
+    if (qBrandId && cfg.brandId && cfg.brandId !== qBrandId) {
+      return;
+    }
+
+    if (window.applyConfig) {
       window.applyConfig(cfg);
       try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const qInstanceId = urlParams.get('instanceId') || urlParams.get('id');
-        const qBrandId = urlParams.get('brandId') || urlParams.get('userId') || urlParams.get('brand');
         const cacheKey = qInstanceId
           ? `fanforge_game_config_${qInstanceId}`
           : qBrandId
