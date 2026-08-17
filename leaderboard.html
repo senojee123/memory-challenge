@@ -438,7 +438,10 @@
     }
 
     if (titleEl) {
-      const gameTitle = config.gameTitle || config.title || 'Memory Challenge';
+      let gameTitle = config.gameTitle || config.title || 'Memory Challenge';
+      if (typeof gameTitle === 'string' && (gameTitle.toUpperCase().includes('LANE') || !gameTitle.toUpperCase().includes('MEMORY'))) {
+        gameTitle = 'Memory Challenge';
+      }
       titleEl.textContent = `${gameTitle} Leaderboard`;
 
       // Title normally uses a fixed gradient (via background-clip:text);

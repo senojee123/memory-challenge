@@ -392,6 +392,161 @@
     box-shadow: none !important;
   }
 
+  /* ─── Minimal Instructions Loading Screen Overlay ─── */
+  #loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: radial-gradient(ellipse at 50% -10%, #262b4a 0%, var(--bg-0, #12131f) 55%);
+    color: var(--paper, #f5efe0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(20px, 5vw, 40px);
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s;
+    overflow: hidden;
+    user-select: none;
+    --load-pct: 0%;
+  }
+
+  #loading-screen.fade-out {
+    opacity: 0;
+    transform: scale(1.04);
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  /* Top Floating Confetti Particles */
+  .confetti-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 180px;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    top: -20px;
+    border-radius: 3px;
+    opacity: 0.85;
+    animation: confettiFall linear infinite;
+  }
+
+  @keyframes confettiFall {
+    0% {
+      transform: translateY(0) rotate(0deg) scale(1);
+      opacity: 0.9;
+    }
+    50% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(200px) rotate(360deg) scale(0.6);
+      opacity: 0;
+    }
+  }
+
+  /* Center Content Card */
+  .loading-card-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  #loading-brand-logo {
+    max-height: 48px;
+    max-width: 200px;
+    object-fit: contain;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  }
+
+  .loading-heading {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--paper, #f5efe0);
+    margin: 0 0 28px 0;
+    position: relative;
+  }
+
+  .loading-instructions-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .loading-instruction-line {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: clamp(0.75rem, 2.6vw, 0.92rem);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--paper, #f5efe0);
+    opacity: 0.9;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .loading-instruction-note {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    font-size: clamp(0.68rem, 2.2vw, 0.8rem);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted, #a6a9c8);
+    opacity: 0.7;
+    margin-top: 16px;
+  }
+
+  /* Bottom Progress Bar */
+  .loading-progress-container {
+    position: absolute;
+    bottom: max(36px, 5vh);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+  }
+
+  .loading-progress-track {
+    width: 170px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .loading-progress-fill {
+    height: 100%;
+    width: var(--load-pct, 0%);
+    background: linear-gradient(90deg, var(--gold, #d9ab52), var(--accent, #ff6b35));
+    border-radius: 999px;
+    box-shadow: 0 0 10px var(--accent, #ff6b35);
+    transition: width 0.08s ease-out;
+  }
+
   /* ─── Reduced motion ─── */
   @media (prefers-reduced-motion: reduce) {
     .card, .particle, .q-mark { animation: none !important; transition-duration: 0.01ms !important; }
@@ -399,6 +554,29 @@
 </style>
 </head>
 <body>
+
+<!-- Minimal Instructions Loading Screen Overlay -->
+<div id="loading-screen">
+  <div class="confetti-container" id="confetti-container"></div>
+
+  <div class="loading-card-content">
+    <img id="loading-brand-logo" src="" alt="Brand Logo" style="display:none;" />
+    <h2 class="loading-heading">INSTRUCTIONS</h2>
+
+    <div class="loading-instructions-body">
+      <p class="loading-instruction-line" id="loading-line-1">FLIP CARDS TO FIND MATCHING PAIRS</p>
+      <p class="loading-instruction-line" id="loading-line-2">MATCH ALL PAIRS IN THE FEWEST MOVES</p>
+      <p class="loading-instruction-line" id="loading-line-3">TEST YOUR MEMORY & SET HIGH SCORES</p>
+      <p class="loading-instruction-note" id="loading-line-4">TAP ANY CARD TO START MATCHING</p>
+    </div>
+  </div>
+
+  <div class="loading-progress-container">
+    <div class="loading-progress-track">
+      <div class="loading-progress-fill" id="loading-bar-inner"></div>
+    </div>
+  </div>
+</div>
 
 <div class="stage">
   <header>
@@ -509,6 +687,66 @@
   const STREAK_THRESHOLD = 3;
   const STREAK_BONUS     = 500;
 
+  /* ── Minimal Instructions Loading Screen Progress & Confetti ── */
+  const loadingScreenOverlay = document.getElementById('loading-screen');
+  let currentProgress = 0;
+  let loadingInterval = null;
+
+  function setLoadingProgress(pct) {
+    currentProgress = Math.min(100, Math.max(currentProgress, pct));
+    if (loadingScreenOverlay) {
+      loadingScreenOverlay.style.setProperty('--load-pct', `${currentProgress}%`);
+    }
+    if (currentProgress >= 100) {
+      if (loadingInterval) clearInterval(loadingInterval);
+      setTimeout(() => {
+        if (loadingScreenOverlay) loadingScreenOverlay.classList.add('fade-out');
+      }, 350);
+    }
+  }
+
+  function startLoadingAnimation() {
+    let target = 0;
+    loadingInterval = setInterval(() => {
+      if (target < 85) {
+        target += Math.random() * 14 + 6;
+      } else {
+        target += 5;
+      }
+      if (target >= 100) {
+        target = 100;
+      }
+      setLoadingProgress(target);
+    }, 50);
+  }
+
+  function initConfetti() {
+    const container = document.getElementById('confetti-container');
+    if (!container) return;
+    const colors = ['#d9ab52', '#ff6b35', '#6ee7b7', '#ffd166', '#a6a9c8', '#f5efe0'];
+    const count = 24;
+
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const color = colors[i % colors.length];
+      const isPill = i % 3 === 0;
+      const w = isPill ? (Math.random() * 8 + 10) : (Math.random() * 5 + 6);
+      const h = isPill ? (Math.random() * 3 + 4) : (Math.random() * 5 + 6);
+
+      piece.style.width = `${w}px`;
+      piece.style.height = `${h}px`;
+      piece.style.background = color;
+      piece.style.left = `${Math.random() * 95}%`;
+      piece.style.animationDuration = `${Math.random() * 2.5 + 2}s`;
+      piece.style.animationDelay = `${Math.random() * 2}s`;
+      container.appendChild(piece);
+    }
+  }
+
+  startLoadingAnimation();
+  initConfetti();
+
   /* ── Utilities ── */
   function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
@@ -546,6 +784,7 @@
   function applyConfig(rawConfig) {
     if (!rawConfig) return;
     const config = rawConfig.config || rawConfig;
+    if (config.game && config.game !== 'memory-challenge') return;
     activeConfig = config;
     window.applyConfig = applyConfig;
 
@@ -577,7 +816,11 @@
     // Apply text & title
     const titleEl = document.getElementById('game-title');
     if (titleEl) {
-      titleEl.textContent = config.gameTitle || config.title || 'MEMORY CHALLENGE';
+      let t = config.gameTitle || config.title || 'DIALOG MEMORY CHALLENGE';
+      if (typeof t === 'string' && (t.toUpperCase().includes('LANE') || !t.toUpperCase().includes('MEMORY'))) {
+        t = 'DIALOG MEMORY CHALLENGE';
+      }
+      titleEl.textContent = t;
       if (config.titleColor) {
         titleEl.style.color = config.titleColor;
       } else if (config.brandColor) {
@@ -600,12 +843,21 @@
 
     // Apply brand logo
     const logoEl = document.getElementById('brand-logo');
+    const loadingBrandLogo = document.getElementById('loading-brand-logo');
     if (logoEl) {
       if (config.brandLogo) {
         logoEl.src = config.brandLogo;
         logoEl.style.display = 'block';
       } else {
         logoEl.style.display = 'none';
+      }
+    }
+    if (loadingBrandLogo) {
+      if (config.brandLogo) {
+        loadingBrandLogo.src = config.brandLogo;
+        loadingBrandLogo.style.display = 'block';
+      } else {
+        loadingBrandLogo.style.display = 'none';
       }
     }
 
@@ -821,13 +1073,26 @@
     ? `fanforge_game_config_${qBrandId}_memory-challenge`
     : `fanforge_game_config_memory-challenge`;
 
+  // Clear any legacy/stale cached items in localStorage that contain LANE
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && (k.includes('fanforge_game_config') || k.includes('lane'))) {
+        const v = localStorage.getItem(k);
+        if (v && (v.includes('LANE') || v.includes('lane-daze') || v.includes('lane-dash'))) {
+          localStorage.removeItem(k);
+        }
+      }
+    }
+  } catch (e) {}
+
   // Attempt to load from cache immediately to eliminate loading latency
   let hasLoadedFromCache = false;
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const parsedConfig = JSON.parse(cached);
-      if (parsedConfig) {
+      if (parsedConfig && parsedConfig.game === 'memory-challenge') {
         applyConfig(parsedConfig);
         hasLoadedFromCache = true;
       }
@@ -957,6 +1222,7 @@
   onValue(ref(db, 'gameConfig'), (snapshot) => {
     const cfg = snapshot.val();
     if (!cfg) return;
+    if (cfg.game && cfg.game !== 'memory-challenge') return;
 
     // If we are looking for a specific instance/brand, ignore updates from other games
     if (qInstanceId && cfg.instanceId !== qInstanceId) {
