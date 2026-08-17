@@ -154,25 +154,21 @@
   }
 
   /* ══════════════════════════════════
-     TWO-COLUMN BODY
+     LEADERBOARD BODY
   ══════════════════════════════════ */
   .columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(14px, 3vw, 28px);
+    display: flex;
+    justify-content: center;
     flex: 1;
     align-items: start;
   }
 
-  /* stack on narrow phones */
-  @media (max-width: 640px) {
-    .columns { grid-template-columns: 1fr; }
-  }
-
   /* ──────────────────────────────────
-     LEFT COLUMN — LEADERBOARD
+     LEADERBOARD PANEL
   ────────────────────────────────── */
   .lb-panel {
+    width: 100%;
+    max-width: 560px;
     background: linear-gradient(160deg, var(--panel-a), var(--panel-b));
     border: 1px solid var(--panel-border);
     border-radius: 20px;
@@ -317,110 +313,6 @@
     color: transparent;
   }
 
-  .clear-link {
-    display: block;
-    margin: clamp(10px, 2vw, 16px) auto 0;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.74rem;
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 5px 0;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .clear-link:active { color: var(--paper); }
-
-  /* ──────────────────────────────────
-     RIGHT COLUMN — QR / SCAN TO PLAY
-  ────────────────────────────────── */
-  .qr-panel {
-    background: linear-gradient(160deg, var(--panel-a), var(--panel-b));
-    border: 1px solid var(--panel-border);
-    border-radius: 20px;
-    padding: clamp(18px, 3vw, 32px) clamp(14px, 2.5vw, 28px);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 50px rgba(199,125,255,0.12), 0 0 0 1px rgba(255,255,255,0.04);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: clamp(12px, 2.5vw, 22px);
-  }
-
-  .scan-label {
-    font-family: 'Fraunces', serif;
-    font-weight: 700;
-    font-size: clamp(1rem, 2.8vw, 1.5rem);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    text-align: center;
-    background: linear-gradient(135deg, #ffe08a, var(--accent));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* phone icon pulse */
-  .scan-icon {
-    font-size: clamp(1.2rem, 3vw, 1.8rem);
-    animation: scanpulse 2s ease-in-out infinite;
-    display: block;
-    text-align: center;
-  }
-  @keyframes scanpulse {
-    0%,100% { transform: scale(1); opacity: 0.9; }
-    50%      { transform: scale(1.12); opacity: 1; }
-  }
-
-  /* QR code image with glowing frame */
-  .qr-frame {
-    position: relative;
-    border-radius: 18px;
-    padding: 12px;
-    background: #ffffff;
-    box-shadow:
-      0 0 0 3px rgba(217,171,82,0.6),
-      0 0 28px rgba(217,171,82,0.35),
-      0 0 60px rgba(199,125,255,0.18);
-    animation: qrglow 3s ease-in-out infinite;
-  }
-  @keyframes qrglow {
-    0%,100% { box-shadow: 0 0 0 3px rgba(217,171,82,0.6), 0 0 28px rgba(217,171,82,0.35), 0 0 60px rgba(199,125,255,0.18); }
-    50%      { box-shadow: 0 0 0 3px rgba(255,209,102,0.9), 0 0 40px rgba(255,209,102,0.5), 0 0 80px rgba(199,125,255,0.28); }
-  }
-
-  .qr-frame img {
-    display: block;
-    width: clamp(180px, 28vw, 300px);
-    height: clamp(180px, 28vw, 300px);
-    border-radius: 10px;
-    object-fit: contain;
-  }
-
-  /* "scan with camera" hint */
-  .scan-hint {
-    text-align: center;
-    color: var(--muted);
-    font-size: clamp(0.7rem, 1.8vw, 0.85rem);
-    line-height: 1.5;
-  }
-  .scan-hint strong { color: var(--paper); }
-
-  /* decorative corner dots */
-  .qr-frame::before,
-  .qr-frame::after {
-    content: '';
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--accent);
-    opacity: 0.7;
-  }
-  .qr-frame::before { top: -6px; left: -6px; }
-  .qr-frame::after  { bottom: -6px; right: -6px; background: #c77dff; }
-
   /* ── Sparkles ── */
   .sparkle {
     position: fixed;
@@ -438,7 +330,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .crown, h1, .sparkle, .scan-icon, .qr-frame { animation: none !important; }
+    .crown, h1, .sparkle { animation: none !important; }
     #confetti-canvas { display: none; }
   }
 </style>
@@ -461,10 +353,9 @@
 
 
 
-  <!-- ══ TWO COLUMNS ══ -->
+  <!-- ══ LEADERBOARD ══ -->
   <div class="columns">
 
-    <!-- LEFT — leaderboard -->
     <div class="lb-panel">
       <div class="lb-panel-title">
         🏅 Top Players
@@ -472,19 +363,6 @@
         <span class="live-label">Live</span>
       </div>
       <ol class="lb-list" id="lbList"></ol>
-      <button class="clear-link" id="clearBtn">Clear leaderboard</button>
-    </div>
-
-    <!-- RIGHT — QR / Scan to Play -->
-    <div class="qr-panel">
-      <span class="scan-icon">📱</span>
-      <div class="scan-label">Scan to Play</div>
-
-      <div class="qr-frame">
-        <img src="qr-code.png" alt="Scan this QR code to play Memory Challenge">
-      </div>
-
-
     </div>
 
   </div><!-- /columns -->
@@ -648,7 +526,7 @@
 ════════════════════════════════════════════════ */
 import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getDatabase, ref, onValue, query,
-         orderByChild, limitToLast, remove }      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+         orderByChild, limitToLast }               from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 const firebaseConfig = {
   apiKey:            "AIzaSyDTHb7X6tE3yLFIr7BiKKNfiM8KQNGKHHg",
@@ -663,7 +541,6 @@ const firebaseConfig = {
 const app      = initializeApp(firebaseConfig);
 const db       = getDatabase(app);
 const lbList   = document.getElementById('lbList');
-const clearBtn = document.getElementById('clearBtn');
 
 const MEDALS    = { 0: '🥇', 1: '🥈', 2: '🥉' };
 const TOP_CLASS = { 0: 'top1', 1: 'top2', 2: 'top3' };
@@ -693,7 +570,7 @@ onValue(scoresQuery, (snapshot) => {
   if (!data) {
     const li = document.createElement('li');
     li.className    = 'lb-row empty';
-    li.textContent  = 'No scores yet — scan the QR to play! 🍕';
+    li.textContent  = 'No scores yet — be the first to play! 🍕';
     lbList.appendChild(li);
     return;
   }
@@ -725,15 +602,6 @@ onValue(scoresQuery, (snapshot) => {
   li.textContent = '⚠️ Could not connect to Firebase. Check your internet.';
   lbList.appendChild(li);
   console.error('Firebase read error:', error);
-});
-
-/* Clear all scores from Firebase */
-clearBtn.addEventListener('click', () => {
-  if (confirm('Clear ALL scores for everyone? This cannot be undone.')) {
-    remove(ref(db, 'scores'))
-      .then(() => console.log('Scores cleared.'))
-      .catch(err => alert('Could not clear: ' + err.message));
-  }
 });
 
 </script>
