@@ -928,15 +928,24 @@
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
 
+  // Read once at module load so every score/config write below can tag
+  // itself with which brand's launched instance this game session is for.
+  const urlParams   = new URLSearchParams(window.location.search);
+  const qInstanceId = urlParams.get('instanceId') || urlParams.get('id');
+  const qBrandId    = urlParams.get('brandId') || urlParams.get('userId') || urlParams.get('brand');
+
   /* Exposed globally so the game IIFE can call it */
   window.firebaseSaveScore = function (entry) {
-    push(ref(db, 'scores'), {
+    const payload = {
       name:      entry.name,
       score:     entry.score,
       moves:     entry.moves,
       seconds:   entry.seconds,
       timestamp: Date.now()
-    }).catch(err => console.warn('Firebase write failed:', err));
+    };
+    if (qInstanceId) payload.instanceId = qInstanceId;
+    if (qBrandId) payload.brandId = qBrandId;
+    push(ref(db, 'scores'), payload).catch(err => console.warn('Firebase write failed:', err));
   };
 
   /* Exposed globally for saving dynamic game config */
@@ -948,11 +957,6 @@
   onValue(ref(db, 'gameConfig'), (snapshot) => {
     const cfg = snapshot.val();
     if (!cfg) return;
-
-    // Read active query parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const qInstanceId = urlParams.get('instanceId') || urlParams.get('id');
-    const qBrandId = urlParams.get('brandId') || urlParams.get('userId') || urlParams.get('brand');
 
     // If we are looking for a specific instance/brand, ignore updates from other games
     if (qInstanceId && cfg.instanceId !== qInstanceId) {
